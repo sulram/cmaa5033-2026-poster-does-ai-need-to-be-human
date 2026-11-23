@@ -1,6 +1,6 @@
 # Does AI Need to Be Human at All?
 
-Interactive poster by Marlus Araujo and Wenjue Yang. CMAA5033 The Future of Art in the Age of AI, HKUST (Guangzhou), 2026.
+Interactive poster by Marlus Araujo and Wenjue Yang for CMAA5033 Computational Media and Arts Theory I, taught by Prof. Ingeborg Reichle. HKUST (Guangzhou), 2026.
 
 Live: https://sulram.github.io/cmaa5033-2026-poster-does-ai-need-to-be-human/
 
