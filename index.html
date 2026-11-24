@@ -60,7 +60,7 @@ body.land #mode .glyph { width: 0.62em; height: 1em; }
 #status .b .live::after { color: var(--ultra-text); }
 
 /* text panel */
-#panel { position: absolute; left: 0; right: 0; bottom: 7.4%; padding: 2.2rem 6% 0.8rem; max-height: 47%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+#panel { position: absolute; left: 0; right: 0; top: 50%; bottom: 12%; padding: 1rem 6% 0.8rem; max-height: none; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
   background: linear-gradient(to top, rgba(20,16,12,0.96) 0%, rgba(20,16,12,0.9) 78%, rgba(20,16,12,0) 100%); }
 #panel::-webkit-scrollbar { display: none; }
 .prompt { font-family: var(--mono); font-size: 0.74rem; color: var(--orpiment); margin-bottom: 0.9rem; min-height: 1.2em; }
@@ -144,7 +144,13 @@ nav .step:active { background: rgba(238,230,211,0.1); }
     linear-gradient(var(--c),var(--c)) top right / var(--l) 1px, linear-gradient(var(--c),var(--c)) top right / 1px var(--l),
     linear-gradient(var(--c),var(--c)) bottom left / var(--l) 1px, linear-gradient(var(--c),var(--c)) bottom left / 1px var(--l),
     linear-gradient(var(--c),var(--c)) bottom right / var(--l) 1px, linear-gradient(var(--c),var(--c)) bottom right / 1px var(--l); background-repeat: no-repeat; }
-.mk.qr { font-size: 0.48rem; line-height: 1.45; color: var(--lead-dim); white-space: normal; text-align: right; }
+.mk.qr { z-index: 6; font-size: 0.48rem; line-height: 1.45; color: var(--lead-dim); white-space: normal; text-align: right; }
+.mk.qr .code { margin-bottom: 0 !important; }
+.mk.qr > span { position: absolute; right: calc(100% + 1em); bottom: 0; width: auto; margin: 0; }
+body.qr-ch:not(.land) #panel { top: 48%; padding-top: 0.5rem; bottom: calc(11% + var(--qrh, 0px) + 0.9rem); }
+body.qr-ch.land #panel { bottom: calc(13.5% + var(--qrh, 0px) + 1.4rem); }
+#panel { --ft: 0px; --fb: 0px; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft), #000 calc(100% - var(--fb)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft), #000 calc(100% - var(--fb)), transparent 100%); }
 .mk.qr .code { border-radius: 2px; overflow: hidden; margin-bottom: 0.5em; }
 .mk.qr .code svg { display: block; width: 100%; height: 100%; }
 .mk.qr > span { display: block; width: 30em; margin-left: calc(100% - 30em); white-space: nowrap; }
@@ -186,6 +192,8 @@ nav .step:active { background: rgba(238,230,211,0.1); }
 body.land #scrim { display: block; }
 body.land header { left: 3.5%; right: 3.5%; top: 4.2%; }
 body.land #ttl { font-size: 1.05rem; }
+#ttl { transition: opacity 0.6s; } body.on-cover #ttl { opacity: 0; pointer-events: none; }
+body.on-cover .stack.body .s { font-size: 1.25rem; line-height: 1.4; } body.land.on-cover .stack.body .s { font-size: 1.4rem; }
 body.land #status { left: 3.5%; right: auto; width: 48%; top: 9.2%; }
 body.land #panel { left: 55%; right: 3.5%; top: 15%; bottom: 13.5%; max-height: none; padding: 0 0 1rem; background: none; }
 body.land .head .s { font-size: 1.85rem; }
@@ -286,7 +294,6 @@ const REFS = 'Arielli, E. (2024) “Even an AI Could Do That” and “Techno-an
 ------------------------------------------------------------------- */
 const CH = [
   { id: 'cover', nav: 'Cover', form: 'cover', qr: true, prompt: 'before we begin',
-    head: 'Does AI need to be human at all?',
     body: 'An interactive poster. Two agents narrate it: A writes, B draws. Every line they write was written by Marlus Araujo and Wenjue Yang.',
     byline: 'CMAA5033 Computational Media and Arts Theory I, with Prof. Ingeborg Reichle. HKUST (Guangzhou), 2026.',
     hint: 'Scan the code to open this poster on your phone.',
@@ -315,6 +322,7 @@ const CH = [
         ['more', 'Then the process became part of the work. That is where VISIONS and Reveries live.'],
       ] },
     asks: [
+      ['And nature?', 'From the micro to the macro cosmos, nature is full of beauty with no mind behind it: the golden ratio in a shell, natural fractals, bioluminescent plankton, a snowflake. We admire them without asking who made them. Does a work need a human mind behind it to be worth admiring?', 'coverSpiral'],
       ['Who is speaking here?', 'Two agents narrate this poster: A writes, B draws. Every line was written in advance by Marlus Araujo and Wenjue Yang, yet you may already be reading them as if they meant it.'],
     ] },
 
@@ -412,8 +420,9 @@ const CH = [
       ['technical systems', 'Models, interfaces and machines: the supports that store, process and generate.'],
     ] },
 
-  { id: 'open', nav: 'Open question', form: 'qfinal', prompt: 'what is left?',
+  { id: 'open', nav: 'Open question', form: 'final', prompt: 'what is left?',
     head: 'Not only whether AI can create without being human, but how AI may change what creativity means.',
+    statement: 'We would like to hear from you now.',
     byline: 'Marlus Araujo and Wenjue Yang.', qr: true,
     asks: [
       ['References', REFS],
@@ -428,6 +437,11 @@ const CH = [
 const $ = (s, r = document) => r.querySelector(s);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const poster = $('#poster'), panel = $('#panel'), marks = $('#marks');
+function panelFade() { // fade the text at an edge only when there is more to scroll that way
+  const top = panel.scrollTop > 2, bot = panel.scrollTop + panel.clientHeight < panel.scrollHeight - 2;
+  panel.style.setProperty('--ft', top ? '2.4rem' : '0px'); panel.style.setProperty('--fb', bot ? '2.4rem' : '0px');
+}
+panel.addEventListener('scroll', panelFade, { passive: true }); setInterval(panelFade, 250);
 let W = 0, H = 0, DPR = 1, col = { x: 0, y: 0, w: 1, h: 1 };
 const FR = { x0: -0.44, x1: 0.44, y0: 0.18, y1: 0.84 }; // formation area, set per layout
 let K = 1;          // formation scale relative to the portrait layout
@@ -443,7 +457,7 @@ function layout() {
   if (mode === 'portrait') {
     const cw = Math.min(W, H * 9 / 16), ch = W / H < 9 / 16 ? H : cw * 16 / 9;
     col = { x: (W - cw) / 2, y: (H - ch) / 2, w: cw, h: ch };
-    Object.assign(FR, { x0: -0.44, x1: 0.44, y0: 0.18, y1: 0.84 });
+    Object.assign(FR, { x0: -0.44, x1: 0.44, y0: 0.2, y1: 0.85 });
     fs = clamp(13, cw * 0.0305, 40);
   } else {
     col = { x: 0, y: 0, w: W, h: H };
@@ -560,7 +574,7 @@ let N = 12000;
 let A = {};          // CPU arrays
 let prog, U = {}, B = {};
 let tr = { t0: 0, dur: 2.2, flow: 0, routes: null, speed: 0.12 }; // current transition
-let vis = { size: 3, sizeT: 3, drift: 0.004, driftT: 0.004, sq: 0, sqT: 0, att: -1, attT: -1, alpha: 1 };
+let vis = { size: 3, sizeT: 3, drift: 0.004, driftT: 0.004, sq: 0, sqT: 0, att: -1, attT: -1, fx: 0.2, fxT: 0.2, alpha: 1 };
 let ptr = { x: 0, y: 0.6, s: 0, sT: 0, down: false };
 let tap = [0, 0, -99, 0.1];
 const now = () => performance.now() / 1000;
@@ -568,7 +582,7 @@ const now = () => performance.now() / 1000;
 const VS = `
 precision highp float;
 attribute vec2 aFrom; attribute vec2 aTo; attribute vec3 aCF; attribute vec3 aCT; attribute float aSeed; attribute float aRoute; attribute float aSF; attribute float aST;
-uniform float uT, uT0, uDur, uDrift, uSize, uDpr, uFlow, uSpeed, uAtt, uK, uFT0;
+uniform float uT, uT0, uDur, uDrift, uSize, uDpr, uFlow, uSpeed, uAtt, uK, uFT0, uFx;
 uniform vec3 uCol; uniform vec2 uRes; uniform vec3 uPtr; uniform vec4 uTap;
 uniform vec2 uA0, uB0, uC0, uA1, uB1, uC1, uA2, uB2, uC2;
 varying vec3 vCol;
@@ -593,11 +607,20 @@ void main(){
   pos += vec2(sin(uT * 0.7 + aSeed * 40.0 + pos.y * 6.0 / uK), cos(uT * 0.6 + aSeed * 31.0 + pos.x * 5.0 / uK)) * uDrift * uK * (0.4 + aSeed);
   vec2 to = uPtr.xy - pos; float dist = length(to);
   if (uAtt > 0.0) {
-    float k = smoothstep(0.55 * uK, 0.0, dist) * uPtr.z * uAtt;
-    pos += to * k * 0.82 + vec2(-to.y, to.x) * k * 0.9 * (aSeed - 0.3);
+    float k = smoothstep(0.62 * uK, 0.0, dist) * uPtr.z * uAtt;
+    vec2 off = pos - uPtr.xy;                                                        // a vortex around the hand: spin, pull in, churn
+    float th = k * (3.4 + aSeed * 2.6) * (0.6 + 0.4 * sin(uT * 0.5 + aSeed * 6.283)) + k * k * 2.2;
+    float cs = cos(th), sn = sin(th); off = vec2(cs * off.x - sn * off.y, sn * off.x + cs * off.y) * (1.0 - k * 0.6);
+    float ph = uT * 1.7 + aSeed * 31.0;
+    pos = uPtr.xy + off + vec2(sin(ph + pos.y * 22.0 / uK), cos(ph * 1.21 + pos.x * 19.0 / uK)) * k * 0.06 * uK;
   } else {
-    float k = smoothstep(0.1 * uK, 0.0, dist) * uPtr.z;
-    pos -= normalize(to + 1e-5) * k * 0.04 * uK;
+    float R = mix(0.09, 0.22, uFx) * uK, k = exp(-dist * dist / (R * R)) * uPtr.z * uFx; // gaussian falloff, long tail
+    vec2 n = -normalize(to + 1e-5), tg = vec2(-n.y, n.x);
+    float ph = uT * 2.1 + aSeed * 25.0;
+    vec2 nz = vec2(sin(ph + pos.y * 34.0 / uK), cos(ph * 1.27 + pos.x * 29.0 / uK));
+    pos += n * k * 0.13 * uK * (0.55 + aSeed)                                   // explode outwards
+         + tg * k * 0.11 * uK * (0.6 + aSeed) * sin(uT * 1.6 + aSeed * 6.283)    // vortex, swinging back and forth
+         + nz * k * 0.045 * uK;                                                   // noise, so they never settle
   }
   float tt = uT - uTap.z;
   if (tt > 0.0 && tt < 3.0) {
@@ -627,7 +650,7 @@ function initGL() {
   prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
   gl.useProgram(prog);
-  ['uT', 'uT0', 'uDur', 'uDrift', 'uSize', 'uDpr', 'uFlow', 'uSpeed', 'uAtt', 'uK', 'uFT0', 'uCol', 'uRes', 'uPtr', 'uTap', 'uSq', 'uAlpha',
+  ['uT', 'uT0', 'uDur', 'uDrift', 'uSize', 'uDpr', 'uFlow', 'uSpeed', 'uAtt', 'uK', 'uFT0', 'uFx', 'uCol', 'uRes', 'uPtr', 'uTap', 'uSq', 'uAlpha',
     'uA0', 'uB0', 'uC0', 'uA1', 'uB1', 'uC1', 'uA2', 'uB2', 'uC2'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
   [['aFrom', 2], ['aTo', 2], ['aCF', 3], ['aCT', 3], ['aSeed', 1], ['aRoute', 1], ['aSF', 1], ['aST', 1]].forEach(([n, s]) => {
     const loc = gl.getAttribLocation(prog, n), buf = gl.createBuffer();
@@ -708,6 +731,12 @@ function samplePainting(target, onlyRect) {
 }
 
 /* text sampled into grains */
+function recentre(pts, CW, CHh) { // move the drawn pixels so their bounding box sits in the middle
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (let k = 0; k < pts.length; k += 5) { x0 = Math.min(x0, pts[k]); x1 = Math.max(x1, pts[k]); y0 = Math.min(y0, pts[k + 1]); y1 = Math.max(y1, pts[k + 1]); }
+  const dx = (CW - (x0 + x1)) / 2, dy = (CHh - (y0 + y1)) / 2;
+  for (let k = 0; k < pts.length; k += 5) { pts[k] += dx; pts[k + 1] += dy; }
+}
 function glyphForm(lines, font, rect, colorFn, opts = {}) {
   const CW = 640, CHh = Math.round(CW * rect.h / rect.w);
   const c = document.createElement('canvas'); c.width = CW; c.height = CHh;
@@ -732,6 +761,7 @@ function glyphForm(lines, font, rect, colorFn, opts = {}) {
   for (let yy = 0; yy < CHh; yy += 2) for (let xx = 0; xx < CW; xx += 2) { const k = (yy * CW + xx) * 4; if (d[k + 3] > 120) pts.push(xx, yy, d[k], d[k + 1], d[k + 2]); }
   const n = pts.length / 5, pos = new Float32Array(N * 2), colr = new Float32Array(N * 3);
   if (!n) return null;
+  recentre(pts, CW, CHh);
   for (let i = 0; i < N; i++) {
     const j = (i < n ? Math.floor(rnd() * n) : Math.floor(rnd() * n)) * 5;
     const gx = pts[j] + (rnd() - 0.5) * 2, gy = pts[j + 1] + (rnd() - 0.5) * 2;
@@ -739,7 +769,7 @@ function glyphForm(lines, font, rect, colorFn, opts = {}) {
     colr.set(colorFn(pts[j + 2], pts[j + 3], pts[j + 4], gx / CW, gy / CHh), i * 3);
   }
   const fill = n * 4 / (CW * CHh) * rect.w * rect.h; // filled area in units
-  return { pos, col: colr, size: Math.max(1.6, areaSize(fill) * 1.15), drift: 0.0016, sq: 0, att: -1 };
+  return { pos, col: colr, size: Math.max(1.6, areaSize(fill) * 1.15), drift: 0.0016, sq: 0, att: -1, fx: 1 };
 }
 function fQmark(final) {
   const r = frFit(0.8);
@@ -751,11 +781,88 @@ function fQmark(final) {
     return [Math.min(1, pd[k] / 255 * 1.7) * (1 - m) + L[0] * m, Math.min(1, pd[k + 1] / 255 * 1.7) * (1 - m) + L[1] * m, Math.min(1, pd[k + 2] / 255 * 1.7) * (1 - m) + L[2] * m];
   });
 }
+/* the last chapter: the painted question inside a speech bubble, handed to the audience */
+function fFinal() {
+  const pd = px.getImageData(0, 0, PW, PH).data, L = PAL.lead, m = 0.22;
+  return lineForm((x, W, H) => {
+    const bw = Math.min(W * 0.94, H * 1.12), bh = bw * 0.72, bx = (W - bw) / 2, by = (H - bh * 1.18) / 2, r = bw * 0.12;
+    x.strokeStyle = '#ff0000'; x.lineWidth = Math.max(6, bw * 0.014);
+    x.beginPath(); x.moveTo(bx + r, by); x.lineTo(bx + bw - r, by); x.quadraticCurveTo(bx + bw, by, bx + bw, by + r); x.lineTo(bx + bw, by + bh - r);
+    x.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh); x.lineTo(bx + bw * 0.34, by + bh); x.lineTo(bx + bw * 0.16, by + bh * 1.18); x.lineTo(bx + bw * 0.2, by + bh);
+    x.lineTo(bx + r, by + bh); x.quadraticCurveTo(bx, by + bh, bx, by + bh - r); x.lineTo(bx, by + r); x.quadraticCurveTo(bx, by, bx + r, by); x.stroke();
+    x.fillStyle = '#00ff00'; x.font = `600 ${Math.round(bh * 1.0)}px "Space Grotesk", Arial, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('?', bx + bw / 2, by + bh * 0.55);
+  }, frFit(1.0), (rr, gg, bb, u, v) => {
+    if (gg < rr) return jitterCol(L, 0.05);
+    const ix = Math.min(PW - 1, Math.floor(u * PW)), iy = Math.min(PH - 1, Math.floor(v * PH)), k = (iy * PW + ix) * 4;
+    return [Math.min(1, pd[k] / 255 * 1.7) * (1 - m) + L[0] * m, Math.min(1, pd[k + 1] / 255 * 1.7) * (1 - m) + L[1] * m, Math.min(1, pd[k + 2] / 255 * 1.7) * (1 - m) + L[2] * m];
+  });
+}
 /* the cover: the question itself, in grains */
 function fCover() {
-  const fw = FR.x1 - FR.x0, fh = FR.y1 - FR.y0, r = { x0: FR.x0, y0: FR.y0, w: fw, h: fh * 0.74 };
+  const r = coverRect();
   return glyphForm([{ t: 'Does AI' }, { t: 'need to be' }, { t: 'human', c: '#00ff00' }, { t: 'at all?' }], '600 {s} "Space Grotesk", Arial, sans-serif', r,
     (rr, gg) => jitterCol(gg > rr ? PAL.orp : PAL.lead, 0.06), { lh: 0.98 });
+}
+/* line drawings sampled into grains: the cover cycles title, face, spiral */
+function lineForm(draw, rect, colorFn) {
+  const CW = 640, CHh = Math.round(CW * rect.h / rect.w), c = document.createElement('canvas'); c.width = CW; c.height = CHh;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.lineCap = 'round'; x.lineJoin = 'round';
+  draw(x, CW, CHh);
+  const d = x.getImageData(0, 0, CW, CHh).data, pts = [];
+  for (let yy = 0; yy < CHh; yy += 2) for (let xx = 0; xx < CW; xx += 2) { const k = (yy * CW + xx) * 4; if (d[k + 3] > 120) pts.push(xx, yy, d[k], d[k + 1], d[k + 2]); }
+  const n = pts.length / 5; if (!n) return null;
+  recentre(pts, CW, CHh);
+  const pos = new Float32Array(N * 2), colr = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const j = Math.floor(rnd() * n) * 5, gx = pts[j] + (rnd() - 0.5) * 2, gy = pts[j + 1] + (rnd() - 0.5) * 2;
+    pos[i * 2] = rect.x0 + gx / CW * rect.w; pos[i * 2 + 1] = rect.y0 + gy / CHh * rect.h;
+    colr.set(colorFn(pts[j + 2], pts[j + 3], pts[j + 4], gx / CW, gy / CHh), i * 3);
+  }
+  return { pos, col: colr, size: Math.max(1.6, areaSize(n * 4 / (CW * CHh) * rect.w * rect.h) * 1.15), drift: 0.0016, sq: 0, att: -1, fx: 1 };
+}
+const lineCol = (rr, gg, bb) => jitterCol(gg > rr && gg > bb ? PAL.orp : bb > rr ? hex('#9AA6FF') : PAL.lead, 0.06);
+function coverRect() { return { x0: FR.x0, y0: FR.y0, w: FR.x1 - FR.x0, h: FR.y1 - FR.y0 }; }
+function fFace() { // a face drawn in one continuous, minimal line
+  return lineForm((x, W, H) => {
+    const S = Math.min(W, H * 0.78), ox = W / 2, oy = H * 0.04, X = u => ox + u * S, Y = v => oy + v * S;
+    x.lineWidth = Math.max(5, S * 0.016); x.strokeStyle = '#ff0000'; x.fillStyle = '#ff0000';
+    const path = pts => { x.beginPath(); x.moveTo(X(pts[0]), Y(pts[1])); for (let k = 2; k < pts.length; k += 6) x.bezierCurveTo(X(pts[k]), Y(pts[k + 1]), X(pts[k + 2]), Y(pts[k + 3]), X(pts[k + 4]), Y(pts[k + 5])); x.stroke(); };
+    path([-0.3, 0.42, -0.31, 0.78, -0.12, 0.98, 0, 0.99, 0.12, 0.98, 0.31, 0.78, 0.3, 0.42]);           // jaw
+    path([-0.3, 0.46, -0.36, 0.05, 0.3, -0.06, 0.34, 0.38, 0.36, 0.6, 0.4, 0.95, 0.46, 1.18]);           // hair, falling on one side
+    path([-0.3, 0.46, -0.26, 0.2, -0.06, 0.12, 0.12, 0.2]);                                              // fringe
+    path([-0.2, 0.42, -0.16, 0.38, -0.09, 0.38, -0.05, 0.41]); path([0.05, 0.41, 0.09, 0.38, 0.16, 0.38, 0.2, 0.42]); // brows
+    path([-0.19, 0.5, -0.15, 0.46, -0.08, 0.46, -0.05, 0.5]); path([0.05, 0.5, 0.08, 0.46, 0.15, 0.46, 0.19, 0.5]);  // lids
+    path([-0.02, 0.45, -0.01, 0.58, -0.06, 0.66, 0.0, 0.68, 0.03, 0.69, 0.06, 0.67, 0.06, 0.66]);       // nose
+    x.strokeStyle = '#00ff00';
+    path([-0.1, 0.79, -0.04, 0.76, 0.0, 0.78, 0.0, 0.78, 0.04, 0.76, 0.1, 0.79]); path([-0.1, 0.79, -0.04, 0.85, 0.04, 0.85, 0.1, 0.79]); // lips
+    x.strokeStyle = '#ff0000';
+    path([-0.13, 0.95, -0.12, 1.05, -0.12, 1.12, -0.13, 1.2]); path([0.13, 0.95, 0.12, 1.05, 0.12, 1.12, 0.13, 1.2]); // neck
+  }, coverRect(), lineCol);
+}
+function fSpiral() { // the golden spiral, drawn through its squares: a beauty no one designed
+  return lineForm((x, W, H) => {
+    const phi = (1 + Math.sqrt(5)) / 2; let w = Math.min(W * 0.9, H * 0.9 * phi), h = w / phi, rx = (W - w) / 2, ry = (H - h) / 2;
+    const squares = [], arcs = [];
+    for (let k = 0; k < 9; k++) {
+      const d = k % 4;
+      if (d === 0) { const s = h; squares.push([rx, ry, s]); arcs.push([rx + s, ry + s, s, Math.PI, 1.5 * Math.PI]); rx += s; w -= s; }
+      else if (d === 1) { const s = w; squares.push([rx, ry, s]); arcs.push([rx, ry + s, s, 1.5 * Math.PI, 2 * Math.PI]); ry += s; h -= s; }
+      else if (d === 2) { const s = h; squares.push([rx + w - s, ry, s]); arcs.push([rx + w - s, ry, s, 0, 0.5 * Math.PI]); w -= s; }
+      else { const s = w; squares.push([rx, ry + h - s, s]); arcs.push([rx + s, ry + h - s, s, 0.5 * Math.PI, Math.PI]); h -= s; }
+    }
+    x.strokeStyle = '#0000ff'; x.lineWidth = 3; squares.forEach(([a, b, s]) => x.strokeRect(a, b, s, s));
+    x.strokeStyle = '#00ff00'; x.lineWidth = 7; arcs.forEach(([cx, cy, r, a0, a1]) => { x.beginPath(); x.arc(cx, cy, r, a0, a1); x.stroke(); });
+  }, coverRect(), lineCol);
+}
+let coverRun = 0;
+async function coverLoop() { // title, face, spiral, title again, while the cover is shown
+  const id = ++coverRun, seq = ['coverFace', 'coverSpiral', 'cover'];
+  for (let k = 0; ; k = (k + 1) % seq.length) {
+    await new Promise(r => setTimeout(r, k === 0 ? 6500 : 5200));
+    if (id !== coverRun || CH[cur].id !== 'cover') return;
+    morphTo(seq[k], 2.2);
+  }
 }
 /* a small QR code, built from the module matrix, for the first and last chapters */
 function qrSvg() {
@@ -818,7 +925,7 @@ function fMosaic() {
     const [a, b, dir] = tiles[k], m = dir < 0.5 ? v : u;
     colr.set(jitterCol([a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m, a[2] + (b[2] - a[2]) * m], 0.08), i * 3);
   }
-  return { pos, col: colr, size: areaSize((FR.x1 - FR.x0) * (FR.y1 - FR.y0)) * 1.1, drift: 0.001, sq: 1, att: -1 };
+  return { pos, col: colr, size: areaSize((FR.x1 - FR.x0) * (FR.y1 - FR.y0)) * 1.1, drift: 0.001, sq: 1, att: -1, fx: 0.9 };
 }
 
 /* six tiles waiting for labels */
@@ -1123,8 +1230,8 @@ function fTriad() {
   return discs(triadNodes, 0.3, routes);
 }
 
-const FORMS = { cover: fCover, painting: fPainting, qmark: () => fQmark(false), qfinal: () => fQmark(true), title: fTitle, quad: fQuad, swarm: fSwarm, mosaic: fMosaic, rengong: fRengong, tiles: fTiles, strata: fStrata, apparatus: fApparatus, triad: fTriad };
-const FORM_NAMES = { cover: 'the question', painting: 'an old-master painting', qmark: 'a question mark', qfinal: 'the painting, folded into a question', title: 'one word', quad: 'Arielli’s map', swarm: 'a swarm', mosaic: 'a dataset', rengong: '人工智能', tiles: 'six portraits', strata: 'layers of memory', apparatus: 'the bust and its image', triad: 'three relations' };
+const FORMS = { final: fFinal, cover: fCover, coverFace: fFace, coverSpiral: fSpiral, painting: fPainting, qmark: () => fQmark(false), qfinal: () => fQmark(true), title: fTitle, quad: fQuad, swarm: fSwarm, mosaic: fMosaic, rengong: fRengong, tiles: fTiles, strata: fStrata, apparatus: fApparatus, triad: fTriad };
+const FORM_NAMES = { final: 'the question, handed to you', cover: 'the question', coverFace: 'a face', coverSpiral: 'a spiral, as shells grow', painting: 'an old-master painting', qmark: 'a question mark', qfinal: 'the painting, folded into a question', title: 'one word', quad: 'Arielli’s map', swarm: 'a swarm', mosaic: 'a dataset', rengong: '人工智能', tiles: 'six portraits', strata: 'layers of memory', apparatus: 'the bust and its image', triad: 'three relations' };
 
 function morphTo(name, dur = 2.4, oldCol = null) {
   let f = FORMS[name]();
@@ -1143,7 +1250,7 @@ function morphTo(name, dur = 2.4, oldCol = null) {
   A.aTo.set(f.pos); A.aCT.set(f.col); if (f.sz) A.aST.set(f.sz); else A.aST.fill(1);
   A.aRoute = f.route || new Float32Array(N).fill(-1);
   tr = { t0: t, ft0: t, dur: reduced ? 0.6 : dur, flow: f.flow || 0, routes: f.routes || null, speed: f.speed || 0.12, name };
-  vis.sizeT = f.size; vis.driftT = reduced ? 0 : f.drift; vis.sqT = f.sq; vis.attT = f.att;
+  vis.sizeT = f.size; vis.driftT = reduced ? 0 : f.drift; vis.sqT = f.sq; vis.attT = f.att; vis.fxT = f.fx != null ? f.fx : 0.18; // full pointer storm only on drawings and words, gentle on images people tap
   if (gl) {
     ['aFrom', 'aTo', 'aCF', 'aCT', 'aRoute', 'aSF', 'aST'].forEach(upload);
     const R = tr.routes || [[[0, 0], [0, 0], [0, 0]]];
@@ -1152,21 +1259,27 @@ function morphTo(name, dur = 2.4, oldCol = null) {
 }
 function recolor() { if (gl) { upload('aCF'); upload('aCT'); } }
 
-let last = now();
+let last = now(); const ghost = { w: 0, idle: 0 };
 function frame() {
   const t = now(), dt = Math.min(0.05, t - last); last = t;
   const k = Math.min(1, dt * 2.5);
-  vis.size += (vis.sizeT - vis.size) * k; vis.drift += (vis.driftT - vis.drift) * k; vis.sq += (vis.sqT - vis.sq) * Math.min(1, dt * 1.5); vis.att += (vis.attT - vis.att) * k;
+  vis.size += (vis.sizeT - vis.size) * k; vis.drift += (vis.driftT - vis.drift) * k; vis.sq += (vis.sqT - vis.sq) * Math.min(1, dt * 1.5); vis.att += (vis.attT - vis.att) * k; vis.fx += (vis.fxT - vis.fx) * k;
   ptr.s += (ptr.sT - ptr.s) * Math.min(1, dt * 6);
+  // a ghost hand keeps the figure moving when nobody is touching it; a real pointer sends it away
+  if (ptr.sT > 0) ghost.idle = t;
+  ghost.w += (((!reduced && t - ghost.idle > 1.8) ? (vis.attT > 0 ? 0.85 : 0.38) : 0) - ghost.w) * Math.min(1, dt * (ghost.w > 0.01 && ptr.sT > 0 ? 6 : 0.8));
+  const gcx = (FR.x0 + FR.x1) / 2, gcy = (FR.y0 + FR.y1) / 2, ghw = (FR.x1 - FR.x0) / 2, ghh = (FR.y1 - FR.y0) / 2;
+  const gx = gcx + ghw * 0.72 * Math.sin(t * 0.31) * Math.cos(t * 0.13 + 1.1), gy = gcy + ghh * 0.66 * Math.sin(t * 0.23 + 0.6);
+  const wr = ptr.s / (ptr.s + ghost.w + 1e-4), ux = gx + (ptr.x - gx) * wr, uy = gy + (ptr.y - gy) * wr, us = Math.max(ptr.s, ghost.w);
   if (tr.name === 'painting' && visMedia && t - (frame.lastMedia || 0) > 0.12) { frame.lastMedia = t; if (drawMediaToPainting()) { samplePainting(A.aCT); A.aCF.set(A.aCT); recolor(); } }
   if (gl) {
     gl.viewport(0, 0, cv.width, cv.height);
     gl.clearColor(0.078, 0.063, 0.047, 1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform1f(U.uT, t); gl.uniform1f(U.uT0, tr.t0); gl.uniform1f(U.uDur, tr.dur);
     gl.uniform1f(U.uDrift, vis.drift); gl.uniform1f(U.uSize, vis.size); gl.uniform1f(U.uDpr, DPR);
-    gl.uniform1f(U.uFlow, tr.flow); gl.uniform1f(U.uSpeed, tr.speed); gl.uniform1f(U.uAtt, vis.att); gl.uniform1f(U.uK, K); gl.uniform1f(U.uFT0, tr.ft0 || 0);
+    gl.uniform1f(U.uFlow, tr.flow); gl.uniform1f(U.uSpeed, tr.speed); gl.uniform1f(U.uAtt, vis.att); gl.uniform1f(U.uFx, vis.fx); gl.uniform1f(U.uK, K); gl.uniform1f(U.uFT0, tr.ft0 || 0);
     gl.uniform3f(U.uCol, col.x * DPR, col.y * DPR, col.w * DPR); gl.uniform2f(U.uRes, cv.width, cv.height);
-    gl.uniform3f(U.uPtr, ptr.x, ptr.y, ptr.s); gl.uniform4f(U.uTap, tap[0], tap[1], tap[2], tap[3]);
+    gl.uniform3f(U.uPtr, ux, uy, us); gl.uniform4f(U.uTap, tap[0], tap[1], tap[2], tap[3]);
     gl.uniform1f(U.uSq, vis.sq); gl.uniform1f(U.uAlpha, 1);
     gl.drawArrays(gl.POINTS, 0, N);
   }
@@ -1237,10 +1350,12 @@ function buildMarks(c) {
     c.quads.forEach((q, k) => { const R = quadRects[k]; const m = mk('quad', R.x0, R.y0 - 0.065 * (FR.y1 - FR.y0), q[0] + (k < 2 ? ' <b class="vis">VISIONS</b>' : '')); m.dataset.k = k; list.push(m); });
   }
   if (c.form === 'tiles') tileRects.forEach((R, k) => { const m = mk('chip' + (tileLabels[k] ? ' l' + tileLabels[k] : ''), R.x0 + 0.015 * K, R.y0 + 0.015 * K, tileLabelText(k)); m.dataset.k = k; list.push(m); });
-  if (c.qr && MEDIA.posterUrl && Math.min(innerWidth, innerHeight) >= 500) { // pointless on a phone
-    const label = MEDIA.posterUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''), side = (mode === 'landscape' ? 0.16 : 0.2) * K;
-    const q = mk('qr', FR.x1 - side, FR.y1 - side, `<div class="code">${qrSvg()}</div><span>Scan to open this poster<br><span class="u">${label.replace('/', '/<br>')}</span></span>`, side);
-    q.querySelector('.code').style.height = side * col.w + 'px'; list.push(q);
+  if (c.qr && MEDIA.posterUrl && !(matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) < 500)) { // pointless on a phone
+    const label = MEDIA.posterUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''), side = (mode === 'landscape' ? 0.16 : 0.17) * K;
+    const land = mode === 'landscape', navTop = (document.querySelector('nav').getBoundingClientRect().top - col.y) / col.w;
+    const qx = land ? 0.465 - side : FR.x1 - side, qy = land ? (H / W) * 0.865 - side : navTop - side - 0.03;
+    const q = mk('qr', qx, qy, `<div class="code">${qrSvg()}</div><span>Scan to open this poster<br><span class="u">${label.replace('/', '/<br>')}</span></span>`, side);
+    q.querySelector('.code').style.height = side * col.w + 'px'; list.push(q); document.body.style.setProperty('--qrh', side * col.w + 'px');
   }
   if (c.form === 'apparatus' && app && app.G) {
     const G = app.G, F = G.frame, V = G.vfd, Hd = G.head;
@@ -1283,13 +1398,13 @@ function autoBoxes() {
 function go(i) {
   i = (i + CH.length) % CH.length;
   if (i === cur) return;
-  cur = i; const c = CH[i]; seen.add(i);
+  cur = i; const c = CH[i]; seen.add(i); document.body.classList.toggle('on-cover', c.id === 'cover'); document.body.classList.toggle('qr-ch', !!c.qr);
   [...ticks.children].forEach((b, k) => { b.classList.toggle('cur', k === i); b.classList.toggle('seen', seen.has(k)); b.setAttribute('aria-current', k === i ? 'step' : 'false'); });
   $('#whereName').textContent = c.nav; $('#whereNum').textContent = `${i + 1} of ${CH.length}`;
   try { history.replaceState(null, '', '#' + c.id); } catch (e) {}
   reacted = false; dragTime = 0; quadOn = -1;
-  stopApparatus();
-  morphTo(c.form);
+  stopApparatus(); coverRun++;
+  morphTo(c.form); if (c.id === 'cover') coverLoop();
   buildMarks(c);
   if (c.form === 'apparatus') { VFD.text = ''; VFD.caret = true; drawVFD(); apparatusLoop(); }
   enter(c);
@@ -1299,8 +1414,8 @@ async function enter(c) {
   runId++; skipping = false; const id = runId; typingNow = true; doneAt = 0;
   panel.innerHTML = ''; panel.scrollTop = 0;
   const pr = document.createElement('p'); pr.className = 'prompt';
-  const hd = stackEl('head', c.head);
-  panel.append(pr, hd);
+  const hd = c.head ? stackEl('head', c.head) : null;
+  panel.append(pr); if (hd) panel.append(hd);
   let bd, st, by;
   if (c.body) { bd = stackEl('body', c.body); panel.append(bd); }
   if (c.statement) { st = stackEl('statement', c.statement); panel.append(st); }
@@ -1319,7 +1434,7 @@ async function enter(c) {
     await type(pr, '› ' + c.prompt, 34, id);
     setA('is writing', true);
     await wait(350, id);
-    await typeStack(hd, c.head, 46, id);
+    if (hd) await typeStack(hd, c.head, 46, id);
     if (bd) await typeStack(bd, c.body, 95, id);
     if (st) { await wait(300, id); await typeStack(st, c.statement, 50, id); }
     if (by) await typeStack(by, c.byline, 70, id);
@@ -1369,9 +1484,12 @@ function buildAsks(c, asks, thread) {
     const b = document.createElement('button'); b.className = 'ask photos'; b.textContent = c.photos; b.onclick = () => openLightbox(MEDIA.reveriesPhotos, 0); acts.append(b);
   }
   if (acts.children.length) asks.append(acts);
-  (c.asks || []).forEach(([q, a]) => {
+  (c.asks || []).forEach(([q, a, form]) => {
     const b = document.createElement('button'); b.className = 'ask'; b.textContent = q;
-    b.onclick = () => { b.remove(); if (a === null) { go(0); return; } say(thread, q, a); };
+    b.onclick = () => {
+      b.remove(); if (a === null) { go(0); return; } say(thread, q, a);
+      if (form) { morphTo(form, 2.2); setTimeout(() => { if (CH[cur] === c) morphTo(c.form, 2.2); }, 11000); } // B draws while A answers, then returns
+    };
     asks.append(b);
   });
 }
@@ -1420,6 +1538,7 @@ addEventListener('pointerup', e => {
   down = null;
 });
 addEventListener('pointercancel', () => { ptr.down = false; ptr.sT = 0; down = null; });
+document.addEventListener('pointerleave', () => { if (!ptr.down) ptr.sT = 0; });
 panel.addEventListener('click', e => { if (!e.target.closest('button') && typingNow) skipping = true; lastInput = performance.now(); });
 
 function inside(R, x, y) { return x >= R.x0 && x <= R.x0 + R.w && y >= R.y0 && y <= R.y0 + R.h; }
