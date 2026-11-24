@@ -421,7 +421,7 @@ const CH = [
     ] },
 
   { id: 'open', nav: 'Open question', form: 'final', prompt: 'what is left?',
-    head: 'Not only whether AI can create without being human, but how AI may change what creativity means.',
+    head: 'The question is not only whether AI can create without being human, but how AI may change what creativity means.',
     statement: 'We would like to hear from you now.',
     byline: 'Marlus Araujo and Wenjue Yang.', qr: true,
     asks: [
@@ -823,21 +823,20 @@ function lineForm(draw, rect, colorFn) {
 }
 const lineCol = (rr, gg, bb) => jitterCol(gg > rr && gg > bb ? PAL.orp : bb > rr ? hex('#9AA6FF') : PAL.lead, 0.06);
 function coverRect() { return { x0: FR.x0, y0: FR.y0, w: FR.x1 - FR.x0, h: FR.y1 - FR.y0 }; }
-function fFace() { // a face drawn in one continuous, minimal line
+/* the cover's two faces: Marlus Araujo's one-line drawing, mirrored so A and B look at each other */
+const FACE_LINE = 'data:image/png;base64,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';
+const faceImg = new Image(); faceImg.src = FACE_LINE;
+function fFace() {
+  if (!faceImg.complete || !faceImg.naturalWidth) return fCover();
+  const tint = (c) => { const t = document.createElement('canvas'); t.width = faceImg.naturalWidth; t.height = faceImg.naturalHeight; const g = t.getContext('2d');
+    g.drawImage(faceImg, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = c; g.fillRect(0, 0, t.width, t.height); return t; };
+  const ca = tint('#00ff00'), cb = tint('#0000ff');
   return lineForm((x, W, H) => {
-    const S = Math.min(W, H * 0.78), ox = W / 2, oy = H * 0.04, X = u => ox + u * S, Y = v => oy + v * S;
-    x.lineWidth = Math.max(5, S * 0.016); x.strokeStyle = '#ff0000'; x.fillStyle = '#ff0000';
-    const path = pts => { x.beginPath(); x.moveTo(X(pts[0]), Y(pts[1])); for (let k = 2; k < pts.length; k += 6) x.bezierCurveTo(X(pts[k]), Y(pts[k + 1]), X(pts[k + 2]), Y(pts[k + 3]), X(pts[k + 4]), Y(pts[k + 5])); x.stroke(); };
-    path([-0.3, 0.42, -0.31, 0.78, -0.12, 0.98, 0, 0.99, 0.12, 0.98, 0.31, 0.78, 0.3, 0.42]);           // jaw
-    path([-0.3, 0.46, -0.36, 0.05, 0.3, -0.06, 0.34, 0.38, 0.36, 0.6, 0.4, 0.95, 0.46, 1.18]);           // hair, falling on one side
-    path([-0.3, 0.46, -0.26, 0.2, -0.06, 0.12, 0.12, 0.2]);                                              // fringe
-    path([-0.2, 0.42, -0.16, 0.38, -0.09, 0.38, -0.05, 0.41]); path([0.05, 0.41, 0.09, 0.38, 0.16, 0.38, 0.2, 0.42]); // brows
-    path([-0.19, 0.5, -0.15, 0.46, -0.08, 0.46, -0.05, 0.5]); path([0.05, 0.5, 0.08, 0.46, 0.15, 0.46, 0.19, 0.5]);  // lids
-    path([-0.02, 0.45, -0.01, 0.58, -0.06, 0.66, 0.0, 0.68, 0.03, 0.69, 0.06, 0.67, 0.06, 0.66]);       // nose
-    x.strokeStyle = '#00ff00';
-    path([-0.1, 0.79, -0.04, 0.76, 0.0, 0.78, 0.0, 0.78, 0.04, 0.76, 0.1, 0.79]); path([-0.1, 0.79, -0.04, 0.85, 0.04, 0.85, 0.1, 0.79]); // lips
-    x.strokeStyle = '#ff0000';
-    path([-0.13, 0.95, -0.12, 1.05, -0.12, 1.12, -0.13, 1.2]); path([0.13, 0.95, 0.12, 1.05, 0.12, 1.12, 0.13, 1.2]); // neck
+    const a = faceImg.naturalWidth / faceImg.naturalHeight, gap = 0.08;
+    let h = H * 0.98, w = h * a; if (w * 2 + W * gap > W * 0.94) { w = (W * 0.94 - W * gap) / 2; h = w / a; }
+    const y = (H - h) / 2, xB = W / 2 + W * gap / 2, xA = W / 2 - W * gap / 2 - w;
+    x.drawImage(cb, xB, y, w, h);                                                     // B, on the right, looking left as drawn
+    x.save(); x.translate(xA + w, y); x.scale(-1, 1); x.drawImage(ca, 0, 0, w, h); x.restore(); // A, mirrored, looking right
   }, coverRect(), lineCol);
 }
 function fSpiral() { // the golden spiral, drawn through its squares: a beauty no one designed
@@ -1231,7 +1230,7 @@ function fTriad() {
 }
 
 const FORMS = { final: fFinal, cover: fCover, coverFace: fFace, coverSpiral: fSpiral, painting: fPainting, qmark: () => fQmark(false), qfinal: () => fQmark(true), title: fTitle, quad: fQuad, swarm: fSwarm, mosaic: fMosaic, rengong: fRengong, tiles: fTiles, strata: fStrata, apparatus: fApparatus, triad: fTriad };
-const FORM_NAMES = { final: 'the question, handed to you', cover: 'the question', coverFace: 'a face', coverSpiral: 'a spiral, as shells grow', painting: 'an old-master painting', qmark: 'a question mark', qfinal: 'the painting, folded into a question', title: 'one word', quad: 'Arielli’s map', swarm: 'a swarm', mosaic: 'a dataset', rengong: '人工智能', tiles: 'six portraits', strata: 'layers of memory', apparatus: 'the bust and its image', triad: 'three relations' };
+const FORM_NAMES = { final: 'the question, handed to you', cover: 'the question', coverFace: 'two faces, A and B', coverSpiral: 'a spiral, as shells grow', painting: 'an old-master painting', qmark: 'a question mark', qfinal: 'the painting, folded into a question', title: 'one word', quad: 'Arielli’s map', swarm: 'a swarm', mosaic: 'a dataset', rengong: '人工智能', tiles: 'six portraits', strata: 'layers of memory', apparatus: 'the bust and its image', triad: 'three relations' };
 
 function morphTo(name, dur = 2.4, oldCol = null) {
   let f = FORMS[name]();
@@ -1264,13 +1263,15 @@ function frame() {
   const t = now(), dt = Math.min(0.05, t - last); last = t;
   const k = Math.min(1, dt * 2.5);
   vis.size += (vis.sizeT - vis.size) * k; vis.drift += (vis.driftT - vis.drift) * k; vis.sq += (vis.sqT - vis.sq) * Math.min(1, dt * 1.5); vis.att += (vis.attT - vis.att) * k; vis.fx += (vis.fxT - vis.fx) * k;
-  ptr.s += (ptr.sT - ptr.s) * Math.min(1, dt * 6);
+  ptr.s += (ptr.sT - ptr.s) * Math.min(1, dt * (ptr.sT > ptr.s ? 2.6 : 0.9)); // slow rise, slower decay
+  if (ptr.sx == null) { ptr.sx = ptr.x; ptr.sy = ptr.y; }
+  ptr.sx += (ptr.x - ptr.sx) * Math.min(1, dt * 2.8); ptr.sy += (ptr.y - ptr.sy) * Math.min(1, dt * 2.8); // the field trails the hand
   // a ghost hand keeps the figure moving when nobody is touching it; a real pointer sends it away
   if (ptr.sT > 0) ghost.idle = t;
   ghost.w += (((!reduced && t - ghost.idle > 1.8) ? (vis.attT > 0 ? 0.85 : 0.38) : 0) - ghost.w) * Math.min(1, dt * (ghost.w > 0.01 && ptr.sT > 0 ? 6 : 0.8));
   const gcx = (FR.x0 + FR.x1) / 2, gcy = (FR.y0 + FR.y1) / 2, ghw = (FR.x1 - FR.x0) / 2, ghh = (FR.y1 - FR.y0) / 2;
   const gx = gcx + ghw * 0.72 * Math.sin(t * 0.31) * Math.cos(t * 0.13 + 1.1), gy = gcy + ghh * 0.66 * Math.sin(t * 0.23 + 0.6);
-  const wr = ptr.s / (ptr.s + ghost.w + 1e-4), ux = gx + (ptr.x - gx) * wr, uy = gy + (ptr.y - gy) * wr, us = Math.max(ptr.s, ghost.w);
+  const wr = ptr.s / (ptr.s + ghost.w + 1e-4), ux = gx + (ptr.sx - gx) * wr, uy = gy + (ptr.sy - gy) * wr, us = Math.max(ptr.s, ghost.w);
   if (tr.name === 'painting' && visMedia && t - (frame.lastMedia || 0) > 0.12) { frame.lastMedia = t; if (drawMediaToPainting()) { samplePainting(A.aCT); A.aCF.set(A.aCT); recolor(); } }
   if (gl) {
     gl.viewport(0, 0, cv.width, cv.height);
